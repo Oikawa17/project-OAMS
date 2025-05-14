@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-
+const mysql = require('mysql2');
 const router = express.Router();
 
 
@@ -37,10 +37,6 @@ const parseFormData = multer().none();
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadPath = './uploads/'; // Single uploads folder
-
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
 
         cb(null, uploadPath);
     },

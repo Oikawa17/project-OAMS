@@ -41,6 +41,16 @@ router.post('/submit', (req, res) => {
     res.status(200).json({ message: 'Application updated successfully!' });
   });
 });
-
+// router.get('/application-status/:applicationId', (req, res) => {
+//     const { applicationId } = req.params;
+    
+//     db.query('SELECT status, last_updated FROM applications WHERE application_id = ?', [applicationId], (err, result) => {
+//         if (err) {
+//             console.error("Database Error:", err);
+//             return res.status(500).json({ error: 'Database retrieval failed' });
+//         }
+//         res.json(result.length > 0 ? result[0] : { status: 'Not Found', last_updated: null });
+//     });
+// });
 
 module.exports = router;
