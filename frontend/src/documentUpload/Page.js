@@ -55,6 +55,8 @@ const DocumentUpload = () => {
         }
     };
 
+    
+
     return (
         <div>
             <h2><strong>Application ID:</strong> {applicationId}</h2>
@@ -68,6 +70,8 @@ const DocumentUpload = () => {
                 </div>
             ))}
         </div>
+
+        
     );
 };
 

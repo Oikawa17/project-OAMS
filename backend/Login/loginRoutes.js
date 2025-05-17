@@ -13,7 +13,7 @@ const db = mysql.createConnection({
 
 // Function to create a folder if it doesn't exist
 const createFolder = (application_id) => {
-  const folderPath = path.join(__dirname, '../uploads', application_id); // Ensures it's inside backend/uploads
+  const folderPath = path.join(__dirname, '../uploads', application_id);
   console.log("Folderpath:", folderPath);
 
   if (!fs.existsSync(folderPath)) {
@@ -39,12 +39,27 @@ router.post('/', (req, res) => {
       }
 
       if (user.is_temp) {
-        createFolder(application_id); // Create folder on first login
+        createFolder(application_id);
         return res.status(200).json({ changePassword: true, application_id: user.application_id });
       }
 
-      createFolder(application_id); // Ensure folder is created
+      createFolder(application_id);
       res.status(200).json({ dashboard: true, application_id: user.application_id });
+
+      // ✅ Insert application_id into doc_uploaded if it doesn’t exist
+      db.query(
+        `INSERT INTO doc_uploaded (application_id) 
+         SELECT ? FROM DUAL 
+         WHERE NOT EXISTS (SELECT application_id FROM doc_uploaded WHERE application_id = ?)`,
+        [application_id, application_id],
+        (err) => {
+          if (err) {
+            console.error("Database Insert Error:", err);
+            return res.status(500).json({ error: 'Failed to insert application_id' });
+          }
+          console.log(`Application ID ${application_id} inserted into doc_uploaded if missing.`);
+        }
+      );
     }
   );
 });
@@ -58,7 +73,7 @@ router.post('/change-password', (req, res) => {
     if (err) return res.status(500).send('Database error');
     if (result.affectedRows === 0) return res.status(404).send('User not found');
 
-    createFolder(application_id); // Create folder after password change
+    createFolder(application_id);
     res.status(200).send('Password updated successfully');
   });
 });

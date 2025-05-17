@@ -5,7 +5,17 @@ const path = require('path');
 const mysql = require('mysql2');
 const router = express.Router();
 
+const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'main'
+});
 
+db.connect(err => {
+    if (err) console.error('Database connection failed:', err);
+    else console.log('Connected to MySQL');
+});
 // Middleware to parse FormData fields properly
 const parseFormData = multer().none(); 
 
@@ -20,7 +30,7 @@ const parseFormData = multer().none();
 
 //        const uploadPath = `./uploads/${applicationId}`;
 //        console.log("Upload path:", uploadPath); // ✅ Log application ID
-      
+
 //         if (!fs.existsSync(uploadPath)) {
 //            fs.mkdirSync(uploadPath, { recursive: true });
 //        }
@@ -71,10 +81,13 @@ router.post('/upload/:category', upload.single('file'), (req, res) => {
 
     fs.renameSync(req.file.path, uploadPath); // Rename file correctly
 
-    res.json({
-        message: `${category} uploaded successfully!`,
-        filePath: uploadPath
-    });
+ db.query(`UPDATE doc_uploaded SET ${category} = 'Submitted' WHERE application_id = ?`, [applicationId], (err) => {
+    if (err) return res.status(500).json({ error: 'Database update failed' });
+});
+res.json({
+    message: `${category} uploaded successfully!`,
+    filePath: uploadPath
+});
 });
 
 
