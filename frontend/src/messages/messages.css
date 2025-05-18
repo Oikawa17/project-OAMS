@@ -1,0 +1,105 @@
+.messages-container {
+  display: flex;
+  min-height: 60vh;
+}
+
+.messages-sidebar {
+  width: 220px;
+  border-right: 1px solid #2c781d;
+  padding: 30px 30px 280px 30px;
+  background: #40db61;
+  transition: width 0.2s;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar-logo {
+  display: block;
+  margin: 0 auto 30px auto;
+  width: 36px;
+  height: 36px;
+  transition: width 0.2s, height 0.2s;
+}
+
+/* --- Add for button row with logo --- */
+.sidebar-btn-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.sidebar-btn-logo {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  transition: margin 0.2s, width 0.2s, height 0.2s;
+}
+
+.messages-sidebar.collapsed {
+  width: 60px;
+  padding: 180px 5px;
+}
+
+.messages-sidebar.collapsed .sidebar-logo {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 30px;
+}
+
+/* Move the sidebar button logos a bit to the right when collapsed */
+.messages-sidebar.collapsed .sidebar-btn-logo {
+  margin-right: 0;
+  margin-left: 20px; /* <-- Add this line */
+  display: block;
+   margin-top: 3px;   /* Add spacing above each logo */
+  margin-bottom: 18px;
+}
+
+.messages-sidebar button {
+  display: block;
+  width: 100%;
+  margin-bottom: 5px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid #2c781d;
+  border-radius: 0;
+  padding: 16px 0 16px 0;
+  font-size: 1rem;
+  color: #2c781d;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+  opacity: 1;
+}
+
+.messages-sidebar button.active {
+  background: #2c781d;
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
+}
+
+.messages-sidebar.collapsed .sidebar-btn-row button {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.messages-sidebar.collapsed button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.messages-sidebar .sidebar-icon {
+  position: absolute;
+  top: 20px;
+  left: 19px;
+  font-size: 30px;
+  opacity: 0.5;
+}
+
+.messages-content {
+  flex: 1;
+  padding: 40px;
+}
