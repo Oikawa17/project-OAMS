@@ -1,14 +1,4 @@
-import { useState } from 'react';
-
-
-const applicationId = localStorage.getItem('application_id');
-
-if (!applicationId) {
-    alert("Error: No application ID found. Please log in again.");
-    window.location.href = "/login"; // Redirect user if ID is missing
-}
-
-
+import { useState, useEffect } from 'react';
 
 const categories = [
     { key: "form_137", label: "Form 137 (Transcript of Records)" },
@@ -23,6 +13,17 @@ const categories = [
 const DocumentUpload = () => {
     const [files, setFiles] = useState({});
     const [messages, setMessages] = useState({});
+    const [applicationId, setApplicationId] = useState('');
+
+    useEffect(() => {
+        const storedId = localStorage.getItem('application_id');
+        if (!storedId) {
+            alert("Error: No application ID found. Please log in again.");
+            window.location.href = "/login";
+        } else {
+            setApplicationId(storedId);
+        }
+    }, []);
 
     const handleFileChange = (e, category) => {
         setFiles(prevFiles => ({
@@ -32,7 +33,6 @@ const DocumentUpload = () => {
     };
 
     const handleUpload = async (category) => {
-        const applicationId = localStorage.getItem('application_id'); // Retrieve ID from storage
         if (!files[category]) {
             setMessages(prev => ({ ...prev, [category]: 'Please select a file' }));
             return;
@@ -40,7 +40,7 @@ const DocumentUpload = () => {
 
         const formData = new FormData();
         formData.append('file', files[category]);
-        formData.append('application_id', applicationId); // Include application ID
+        formData.append('application_id', applicationId);
 
         try {
             const response = await fetch(`http://localhost:5000/document-upload/upload/${category}`, {
@@ -55,7 +55,7 @@ const DocumentUpload = () => {
         }
     };
 
-    
+    if (!applicationId) return null; // Prevent rendering until ID is checked
 
     return (
         <div>
@@ -69,9 +69,7 @@ const DocumentUpload = () => {
                     <p>{messages[key]}</p>
                 </div>
             ))}
-        </div>
-
-        
+        </div>  
     );
 };
 
