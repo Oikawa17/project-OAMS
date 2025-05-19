@@ -19,30 +19,8 @@ db.connect(err => {
 // Middleware to parse FormData fields properly
 const parseFormData = multer().none(); 
 
-// const application_id = "test"; // Placeholder for application ID
+const application_id = "test"; // Placeholder for application ID
 // Define storage with dynamic folder creation
-// const storage = multer.diskStorage({
-//    destination: (req, file, cb) => {
-//        const applicationId = req.body.application_id; // Get ID from request
-//        if (!applicationId) {
-//            return cb(new Error("Application ID is missing"), null);
-//        }
-
-//        const uploadPath = `./uploads/${applicationId}`;
-//        console.log("Upload path:", uploadPath); // ✅ Log application ID
-
-//         if (!fs.existsSync(uploadPath)) {
-//            fs.mkdirSync(uploadPath, { recursive: true });
-//        }
-
-//        cb(null, uploadPath);
-//    },
-//    filename: (req, file, cb) => {
-//        const category = req.params.category; // Use category for filename
-//        const fileExtension = path.extname(file.originalname);
-//        cb(null, `${category}${fileExtension}`);
-//    }
-// });
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -92,6 +70,3 @@ res.json({
 
 
 module.exports = router;
-
-
-//

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Login.css'; // Import the CSS file
 import ptcLogo from './images/ptclogo.png';
+import ptcFront from './images/ptcfront.png'; // <-- Import the correct image
 
 function Login() {
   const [applicationId, setApplicationId] = useState('');
@@ -24,7 +25,6 @@ function Login() {
       if (res.data.application_id) {
         localStorage.setItem('application_id', res.data.application_id);
       }
-
       if (res.data.changePassword) {
         navigate('/change-password', { state: { applicationId } });
       } else {
@@ -40,7 +40,7 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-left">
-        <img src="./images/ptc.png" alt="Pateros Technological College" />
+        <img src={ptcFront} alt="Pateros Technological College" /> {/* Use imported image */}
       </div>
 
       <div className="login-right">

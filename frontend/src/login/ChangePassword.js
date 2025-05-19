@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Login.css'; // Reusing the same stylesheet for design consistency
 import ptcLogo from './images/ptclogo.png';
+import ptcFront from './images/ptcfront.png'; // <-- Import the correct image
 
 function ChangePassword() {
   const [newPassword, setNewPassword] = useState('');
@@ -40,7 +41,7 @@ function ChangePassword() {
   return (
     <div className="login-container">
       <div className="login-left">
-        <img src="./images/ptc.png" alt="Pateros Technological College" />
+        <img src={ptcFront} alt="Pateros Technological College" /> {/* Use imported image */}
       </div>
       
       <div className="login-right">
