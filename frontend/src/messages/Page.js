@@ -1,52 +1,104 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import Sidebar from '../components/Sidebar';
 import './messages.css';
 
 function Messages() {
-  const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const applicationId = localStorage.getItem('application_id');
+  const messagesEndRef = useRef(null);
 
-  // Array of button info and logo paths
-  const buttons = [
-    { label: 'Dashboard', path: '/dashboard', logo: '/dash.png' },
-    { label: 'Application Form', path: '/application-form', logo: '/form.png' },
-    { label: 'Application Status', path: '/application-status', logo: '/status.png' },
-    { label: 'Payment Information', path: '/payment-information', logo: '/payment.png' },
-    { label: 'Documents Upload', path: '/document-upload', logo: '/docs.png' },
-    { label: 'Messages', path: '/messages', logo: '/message.png' },
-    { label: 'Profile', path: '/profile', logo: '/profile.png' },
-    { label: 'Settings', path: '/settings', logo: '/settings.png' },
+  const faqs = [
+    { question: "What are the admission requirements?" },
+    { question: "How can I check my application status?" },
+    { question: "What are the available payment methods?" },
+    { question: "When is the enrollment period?" }
   ];
+
+  useEffect(() => {
+    if (!applicationId) return;
+    fetch(`http://localhost:5000/messages/${applicationId}`)
+      .then(res => res.json())
+      .then(setMessages)
+      .catch(() => setMessages([]));
+  }, [applicationId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    const newMsg = {
+      application_id: applicationId,
+      sender: 'user',
+      message: input
+    };
+    await fetch('http://localhost:5000/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newMsg)
+    });
+    setMessages([...messages, { ...newMsg, created_at: new Date().toISOString() }]);
+    setInput('');
+  };
 
   return (
     <div className="messages-container">
-      {/* Left side buttons */}
-      <div
-        className={`messages-sidebar${collapsed ? ' collapsed' : ''}`}
-        onMouseEnter={() => setCollapsed(false)}
-        onMouseLeave={() => setCollapsed(true)}
-      >
-        {buttons.map((btn, idx) => (
-          <div className="sidebar-btn-row" key={btn.label}>
-            <img
-              src={btn.logo}
-              alt={btn.label + " logo"}
-              className="sidebar-btn-logo"
-            />
-            <button onClick={() => navigate(btn.path)}>
-              {btn.label}
-            </button>
-          </div>
-        ))}
-        {collapsed && (
-          <div className="sidebar-icon">☰</div>
-        )}
-      </div>
-      {/* Right side content */}
+      {/* Sidebar */}
+      <Sidebar />
+      {/* Main content */}
       <div className="messages-content">
-        <div>
-          <h3>Welcome to Messages</h3>
-          <p>Select an option from the left to view details.</p>
+        <div className="messages-panel">
+          <div className="messages-title">Messages</div>
+          <div className="messages-subtitle">
+            Contact admissions staff for inquiries about your application.
+          </div>
+          <div className="messages-list">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`message-row ${msg.sender === 'user' ? 'user' : 'admin'}`}>
+                <div className={`message-bubble ${msg.sender === 'user' ? 'user' : 'admin'}`}>
+                  <strong>{msg.sender === 'user' ? 'You' : 'Admin'}</strong>
+                  {msg.message}
+                  <div className="message-date">
+                    {msg.created_at ? new Date(msg.created_at).toLocaleString() : ''}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <form onSubmit={sendMessage} className="messages-form">
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Type your message here..."
+              className="messages-input"
+            />
+            <button type="submit" className="messages-send-btn">➤</button>
+          </form>
+          <div className="messages-response-time">
+            <span>⏱️ Typical response time: 24-48 hours</span>
+          </div>
+        </div>
+        {/* FAQ Section */}
+        <div className="messages-faq-section">
+          <h3>Frequently Asked Questions</h3>
+          <div className="messages-faq-list">
+            {faqs.map((faq, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="messages-faq-item"
+                onClick={() => setInput(faq.question)}
+                title="Click to use this question"
+              >
+                {faq.question}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

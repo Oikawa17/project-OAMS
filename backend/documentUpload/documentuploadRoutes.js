@@ -16,82 +16,81 @@ db.connect(err => {
     if (err) console.error('Database connection failed:', err);
     else console.log('Connected to MySQL');
 });
-// Middleware to parse FormData fields properly
-const parseFormData = multer().none(); 
 
-// const application_id = "test"; // Placeholder for application ID
-// Define storage with dynamic folder creation
-// const storage = multer.diskStorage({
-//    destination: (req, file, cb) => {
-//        const applicationId = req.body.application_id; // Get ID from request
-//        if (!applicationId) {
-//            return cb(new Error("Application ID is missing"), null);
-//        }
-
-//        const uploadPath = `./uploads/${applicationId}`;
-//        console.log("Upload path:", uploadPath); // ✅ Log application ID
-
-//         if (!fs.existsSync(uploadPath)) {
-//            fs.mkdirSync(uploadPath, { recursive: true });
-//        }
-
-//        cb(null, uploadPath);
-//    },
-//    filename: (req, file, cb) => {
-//        const category = req.params.category; // Use category for filename
-//        const fileExtension = path.extname(file.originalname);
-//        cb(null, `${category}${fileExtension}`);
-//    }
-// });
-
+// Multer storage: save to ./uploads, filename: <category><application_id>.<ext>
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = './uploads/'; // Single uploads folder
-
-        cb(null, uploadPath);
+        const applicationId = req.body.application_id;
+        if (!applicationId) {
+            return cb(new Error("Application ID is missing"), null);
+        }
+        const uploadDir = `./uploads/${applicationId}`;
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        const category = req.params.category; // Use category for filename
-        const application_id = req.body.application_id; // Use category for filename
+        const category = req.params.category;
+        const applicationId = req.body.application_id;
         const fileExtension = path.extname(file.originalname);
-        cb(null, `${category}${application_id}${fileExtension}`);
+        cb(null, `${category}${fileExtension}`);
     }
 });
 
 const upload = multer({ storage });
 
-// API to upload files categorized by `application_id`
+// Upload endpoint
 router.post('/upload/:category', upload.single('file'), (req, res) => {
-    console.log("Received application_id:", req.body.application_id); // ✅ Log application ID
-
     const applicationId = req.body.application_id;
     const category = req.params.category;
 
     if (!applicationId) {
         return res.status(400).json({ message: "Application ID is missing from request." });
     }
-
     if (!req.file) {
         return res.status(400).json({ message: `No file uploaded for ${category}` });
     }
 
-    const fileExtension = path.extname(req.file.originalname);
-    const newFilename = `${applicationId}_${category}${fileExtension}`;
-    const uploadPath = `uploads/${applicationId}/${newFilename}`;
-
-    fs.renameSync(req.file.path, uploadPath); // Rename file correctly
-
- db.query(`UPDATE doc_uploaded SET ${category} = 'Submitted' WHERE application_id = ?`, [applicationId], (err) => {
-    if (err) return res.status(500).json({ error: 'Database update failed' });
+    // Mark as Submitted in DB
+    db.query(
+        `UPDATE doc_uploaded SET ${category} = 'Submitted' WHERE application_id = ?`,
+        [applicationId],
+        (err) => {
+            if (err) return res.status(500).json({ error: 'Database update failed' });
+            res.json({
+                message: `${category} uploaded successfully!`,
+                filePath: req.file.path
+            });
+        }
+    );
 });
-res.json({
-    message: `${category} uploaded successfully!`,
-    filePath: uploadPath
-});
+
+// Status endpoint: returns the doc_uploaded row for the user
+router.get('/status/:application_id', (req, res) => {
+    const applicationId = req.params.application_id;
+    db.query('SELECT * FROM doc_uploaded WHERE application_id = ?', [applicationId], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (!results.length) return res.status(404).json({});
+        res.json(results[0]);
+    });
 });
 
+// Endpoint to mark a document as Verified (admin use)
+router.post('/verify/:category', express.json(), (req, res) => {
+    const applicationId = req.body.application_id;
+    const category = req.params.category;
+    if (!applicationId) {
+        return res.status(400).json({ message: "Application ID is missing from request." });
+    }
+    db.query(
+        `UPDATE doc_uploaded SET ${category} = 'Verified' WHERE application_id = ?`,
+        [applicationId],
+        (err) => {
+            if (err) return res.status(500).json({ error: 'Database update failed' });
+            res.json({ message: `${category} marked as Verified!` });
+        }
+    );
+});
 
 module.exports = router;
-
-
-//

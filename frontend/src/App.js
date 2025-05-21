@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './login/Login';
 import ChangePassword from './login/ChangePassword';
 import Dashboard from './dashboard/Dashboard';
-import ApplicationForm from './applicationForm/Page';
+import ApplicationForm from './applicationForm/applicationForm';
 import ApplicationStatus from './applicationStatus/Page';
 import PaymentInformation from './paymentInformation/Page';
 import DocumentUpload from './documentUpload/Page';
